@@ -35,6 +35,29 @@ sensor_enclosure_assembly.step + base/tray/lid .3mf + .stl (High refinement).
 - Material/print: PETG or ASA, 0.6mm nozzle, walls 2.6 / floor 2.4.
 - Clearances (0.6mm nozzle): pocket +0.5, tray 0.25, lid lip 0.4, insert pilot 4.1.
 
+## Fit-check revisions (2026-07-01, doc "Sensor_Case" — NOT the NoInserts doc)
+Physical fit-check drove 3 direct-geometry edits (sketches are script-built, no
+parametric dims, so param changes don't move geometry — edited geometry directly):
+1. Tray ESP/SGP compartment overlap: shifted SGP pocket (Sketch7 + wire-notch
+   Sketch8) -0.6mm X. SGP right wall now X[109.90..111.50] == ESP cradle left wall
+   -> single SHARED 1.6mm wall (was 2.2mm interpenetration).
+2. Tray hit the 4 corner POSTS (base screw bosses Ø8 / r=4 at (4,4)(4,74)
+   (146,4)(146,74), full-height). The 1.85mm left-edge trim did NOT fix this
+   (posts are at the corners, not along the edge) -> REVERTED that trim.
+   Real fix: feature "CornerPostClearance" = 4 circular corner cutouts r=5.5
+   (Ø11) centered on each boss. Clears Ø8 posts by 1.55mm radial; tray restored
+   to full length 149.5mm (snug in 150 cavity -> stays located over the intake).
+   Note: r=5.5 chosen because corner tip is 5.30mm from boss center; a smaller
+   r (tried 4.6) isolates the tip as a <1mm3 sliver, and deleting slivers via
+   body.deleteMe() also deletes the parent cut feature -> use r>=tip distance.
+3. PMS intake was blocked ~1.5mm by tray floor: raised base intake circle
+   (Sketch5) +2.0mm. Center world Z 14.4 -> 16.4; bottom 3.4 -> 5.4, clears tray
+   floor top (4.89) by +0.51mm. Exhaust unaffected (bottom already ~9.9).
+NOTE: Tray is a REMOVABLE carrier (separate print), NOT print-in-place.
+TODO for Jimmy: SAVE the doc manually + RE-EXPORT tray.3mf/.stl and base.3mf/.stl
+(current repo exports are pre-revision). Intake clearance is thin (0.51mm) — raise
+more if you want margin, but that walks away from the real PMS fan center (still TBD).
+
 ## Open items / fit-check TBDs
 - [ ] PMS5003 intake/exhaust EXACT port coords (datasheet is image-only) —
       currently intake X=25 exhaust X=50 within PMS, cz=12mm. Verify vs real unit.
