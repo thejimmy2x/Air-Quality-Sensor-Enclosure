@@ -1,0 +1,14 @@
+# OS / editor cruft
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.tmp
+*~
+
+# Fusion local backups (design is saved in Fusion cloud, not this repo)
+*.f3d
+*.f3z
+*.bak
+
+# Scratch
+/scratch/
