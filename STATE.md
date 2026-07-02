@@ -5,19 +5,28 @@
 **Last updated:** 2026-07-01
 
 ## Current state
-v1 model COMPLETE in Fusion (Untitled doc — NOT saved; Jimmy saves manually).
-3 components built + exported. Awaiting Jimmy's review + physical fit-check.
+Working doc = **"Sensor_Case"** in Fusion (55 params; NOT saved — Jimmy saves manually).
+There is also a stale "Sensor_Case_NoInserts" doc open — ignore it; Sensor_Case is
+canonical (has the M3 insert bosses). v1 + several fit-check revisions applied:
+- Tray + PMS5003 FIT CONFIRMED good (physical).
+- Corner-post clearance scallops added; PMS intake raised; ESP/SGP share a wall.
+- Gas-sensor bays reworked: side-wall wire channels + enlarged SCD-40 (see below).
+Next: physical fit-test of the 3 gas sensors in the reworked bays; then RE-EXPORT
+base (its raised intake isn't in any exported file yet). GitHub main is current
+through the gas-bay rework (commit c07a783), tray export = Sensor_Case_Tray_Final.stl.
 Full plan: `C:\Users\jdp63\.claude\plans\i-have-a-sensor-quizzical-owl.md`
 
-## Model summary (Fusion, 49 user params driving geometry)
+## Model summary (Fusion, 55 user params driving geometry)
 - External size: **155.2 × 83.2 × ~39.4 mm** (base 32.4 tall + lid 7).
 - Interior: 150 × 78 × 30 mm.
 - **Base** (1 body): filleted shell, chamfered floating base, 4 corner insert
   bosses (Ø8, 4.1mm pilot for M3 heat-set), back-wall ports (PMS round intake +
   rect exhaust + USB-C), honeycomb vents front + both sides, LED light-pipe port.
-- **Tray** (1 body): floor 2.5mm + corner boss notches, 3 gas-sensor pockets
-  (wire notches), PMS cradle (open back → intake), ESP cradle (open back → USB),
-  2 front finger scallops. 0.25mm/side clearance to cavity.
+- **Tray** (1 body): floor 2.5mm; 4 corner-post scallops (r=5.5, clears Ø8 posts);
+  3 gas-sensor bays with wire channels on BOTH side (±X) walls — SCD40 26.5×23.8,
+  BME680/SGP40 26.4×18.8; PMS cradle (open back → intake), ESP cradle (open back →
+  USB), 2 front finger scallops. Full length 149.5 (0.25mm/side to cavity).
+  NOTE base intake circle raised +2mm so tray floor no longer blocks it.
 - **Lid** (1 body): 3mm plate, matching fillet + top chamfer, register lip (0.4mm
   clr, corner-notched), 4 M3 screw counterbores aligned to inserts.
 
