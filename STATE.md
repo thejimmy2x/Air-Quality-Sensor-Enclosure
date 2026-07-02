@@ -28,6 +28,36 @@ Thermal zoning: hot back (PMS+ESP) vs cool front (gas sensors); SCD40 front-left
 ## Exports (E:\jdp3d\sensor enclosure\export\)
 sensor_enclosure_assembly.step + base/tray/lid .3mf + .stl (High refinement).
 
+## Gas-sensor bay rework (2026-07-01, after tray/PMS fit confirmed good)
+Tray + PMS5003 now fit perfectly. Reworked the 3 gas-sensor bays:
+- WIRE CHANNELS were on the wrong wall (back +Y). Real Adafruit boards have
+  STEMMA-QT connectors on LEFT+RIGHT (+/-X) edges. Solid side walls were also
+  blocking the connectors from seating -> that was the "bays too small" symptom.
+  Fix: channels moved to BOTH side walls (8mm wide, Y17-25), all 3 bays
+  ("both ends wired out"). Old back notches removed.
+- SCD-40 genuinely too small: board 25.5 x 22.8mm, bay was 19 deep. Enlarged
+  bay to 26.5(X) x 23.8(Y), grown front+back; back wall clears PMS cradle 1.40mm.
+- BME680/SGP40 bays set to 26.4 x 18.8 (fits 25.4 x 17.8 std footprint).
+- SGP40 right channel breaches the shared SGP/ESP wall (routes to ESP).
+- Implementation: DELETED old pocket joins+notch cuts (Extrude3-8, Sketch3-8),
+  REBUILT 3 pockets (Pocket_SCD40/BME680/SGP40) + 6 channels (Chan_*_L/R) on
+  the Z=4.9 floor-top plane (Plane2). Rebuild needed because sketches are
+  unconstrained rects (can't edge-drag cleanly). Single valid body, all healthy.
+- Board dims: SCD40 25.5x22.8 (Adafruit 5187, confirmed); BME680/SGP40 taken as
+  25.4x17.8 std STEMMA-QT (Adafruit hides exact dims in image-only fab prints).
+  VERIFY BME680/SGP40 footprints at physical fit; enlarge if needed.
+
+## Hardware spec — closure (read off Sensor_Case geometry 2026-07-01)
+- Inserts: **M3 brass heat-set**, set into the 4 BASE corner POSTS (Ø8 boss),
+  one per corner. Pocket = Ø4.1 x 6mm deep BLIND hole in each post TOP face
+  (Z 26.4..32.4); install from top (lid side). NOT in the lid.
+- Insert part: standard M3 (~4.0mm OD, ~5.7mm long, e.g. CNC Kitchen M3x5.7 or
+  generic M3x5/M3x4). Do NOT use extra-long M3 (would bottom out in 6mm pocket).
+- Screws: **M3 socket-head cap, ~M3x8** (M3x10 ok for max engagement). Head
+  recesses in lid Ø6.2 x 3mm counterbore; lid clears post top via Ø9.8 recess;
+  ~5mm thread engages the insert. No separate Ø3.4 lid clearance hole (Ø9.8 recess
+  serves that). 4 screws total, one per corner.
+
 ## Locked decisions
 - Fusion MCP parametric; screw-down lid + M3 heat-set inserts (no gasket).
 - Passive honeycomb venting; PMS isolated w/ round fan-intake port + exhaust.
