@@ -1,0 +1,163 @@
+esphome:
+  name: air-quality-monitor
+  friendly_name: Air Quality Monitor
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Air-Quality-Monitor"
+    password: !secret ap_password
+
+captive_portal:
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+
+web_server:
+  port: 80
+
+prometheus:
+
+i2c:
+  sda: GPIO8
+  scl: GPIO9
+  frequency: 100kHz
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: DEBUG
+  logs:
+    pmsx003: WARN
+    bme680.sensor: WARN
+    scd4x: WARN
+    sgp4x: WARN
+    sensor: WARN
+
+uart:
+  id: uart_pms
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 9600
+
+# Globals for tracking previous CO2 value and VOC baseline
+globals:
+  - id: previous_co2
+    type: float
+    restore_value: no
+    initial_value: '0.0'
+  - id: previous_co2_time
+    type: unsigned long
+    restore_value: no
+    initial_value: '0'
+  - id: voc_baseline
+    type: float
+    restore_value: yes
+    initial_value: '100.0'
+
+sensor:
+  - platform: bme680
+    temperature:
+      name: "Temperature"
+      id: bme_temperature
+    pressure:
+      name: "Pressure"
+    humidity:
+      name: "Humidity"
+      id: bme_humidity
+    gas_resistance:
+      name: "Gas Resistance"
+    address: 0x77
+    update_interval: 30s
+    heater:
+      temperature: 320
+      duration: 150ms
+
+  - platform: pmsx003
+    type: PMSX003
+    uart_id: uart_pms
+    pm_1_0:
+      name: "PM1.0 Concentration"
+      id: pm_1_0      
+    pm_2_5:
+      name: "PM2.5 Concentration"
+      id: pm_2_5
+    pm_10_0:
+      name: "PM10.0 Concentration"
+      id: pm_10_0
+
+  - platform: scd4x
+    co2:
+      name: "CO2"
+      id: co2_sensor
+      on_value:
+        then:
+          - lambda: |-
+              unsigned long now = millis();
+              if (id(previous_co2_time) > 0) {
+                float dt_min = (now - id(previous_co2_time)) / 60000.0;
+                if (dt_min > 0) {
+                  float rate = (x - id(previous_co2)) / dt_min;
+                  id(co2_rate).publish_state(rate);
+                }
+              }
+              id(previous_co2) = x;
+              id(previous_co2_time) = now;
+    temperature:
+      name: "SCD41 Temperature"
+    humidity:
+      name: "SCD41 Humidity"
+    update_interval: 60s
+
+  - platform: sgp4x
+    voc:
+      name: "VOC Index"
+      id: voc_index
+      on_value:
+        then:
+          - lambda: |-
+              // Update rolling baseline slowly (1% new reading, 99% old baseline)
+              // This gives a ~100 sample trailing average
+              id(voc_baseline) = (id(voc_baseline) * 0.99) + (x * 0.01);
+              id(voc_deviation).publish_state(x - id(voc_baseline));
+    compensation:
+      humidity_source: bme_humidity
+      temperature_source: bme_temperature
+
+  # CO2 Rate of Change (ppm per minute)
+  - platform: template
+    name: "CO2 Rate of Change"
+    id: co2_rate
+    unit_of_measurement: "ppm/min"
+    accuracy_decimals: 1
+    icon: "mdi:trending-up"
+
+  # VOC Deviation from baseline (positive = spike above normal)
+  - platform: template
+    name: "VOC Deviation"
+    id: voc_deviation
+    unit_of_measurement: ""
+    accuracy_decimals: 1
+    icon: "mdi:air-filter"
+
+  # PM2.5 / PM10 Ratio (higher = more fine particles, combustion/off-gassing)
+  - platform: template
+    name: "PM2.5/PM10 Ratio"
+    unit_of_measurement: ""
+    accuracy_decimals: 2
+    update_interval: 60s
+    icon: "mdi:chart-donut"
+    lambda: |-
+      if (id(pm_10_0).state > 0) {
+        return id(pm_2_5).state / id(pm_10_0).state;
+      } else {
+        return 0;
+      }

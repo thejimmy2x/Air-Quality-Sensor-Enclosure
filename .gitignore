@@ -12,3 +12,7 @@ Desktop.ini
 
 # Scratch
 /scratch/
+
+# ESPHome secrets — WiFi creds etc, never commit
+secrets.yaml
+
