@@ -2,7 +2,7 @@
 
 **Project:** Sensor Enclosure (JDP3D) | **Owner:** Jimmy Pezzone
 **Active track:** enclosure-v1
-**Last updated:** 2026-07-01
+**Last updated:** 2026-07-15
 
 ## Current state
 Working doc = **"Sensor_Case"** in Fusion (NOT saved — Jimmy saves manually).
@@ -15,9 +15,14 @@ revisions applied:
 - Gas-sensor bays reworked: side-wall wire channels + enlarged SCD-40 (see below).
 - **PMS 4-hole air inlet ported (2026-07-01, see below).**
 - **ESP USB port widened to dual-USB-C slot (2026-07-02, see below).**
-Next: physical fit-test of the 3 gas sensors in the reworked bays; then RE-EXPORT
-base (raised intake + new inlet slot are in NO exported file yet). GitHub main is
-current through the gas-bay rework (commit c07a783), tray export = Sensor_Case_Tray_Final.stl.
+- **BASE PRINTED PERFECT (2026-07-03): both port fixes (PMS inlet slot + ESP
+  dual-USB slot) physically CONFIRMED good.**
+- **Sensor retention clips added (2026-07-15, see below).** Doc now has 5
+  components: Base, Tray, Lid, **Clip_SCD40**, **Clip_Gas** (2 occurrences).
+  Tray gained 12 snap windows. NOT SAVED / NOT EXPORTED yet.
+Next: physical fit-test of the 3 gas sensors in the reworked bays — this also
+settles PCB_T, which drives the clip press height. Base exported
+(Sensor_Case.stl) + pushed to GitHub main (commit 3f538e9).
 Full plan: `C:\Users\jdp63\.claude\plans\i-have-a-sensor-quizzical-owl.md`
 
 ## Model summary (Fusion, 55 user params driving geometry)
@@ -34,6 +39,10 @@ Full plan: `C:\Users\jdp63\.claude\plans\i-have-a-sensor-quizzical-owl.md`
   BME680/SGP40 26.4×18.8; PMS cradle (open back → intake), ESP cradle (open back →
   USB), 2 front finger scallops. Full length 149.5 (0.25mm/side to cavity).
   NOTE base intake circle raised +2mm so tray floor no longer blocks it.
+  **+ 12 snap windows (6.0 x 1.8 @ Z5.8-7.6) in the gas-bay walls for the
+  retention clips (2026-07-15).**
+- **Clip_SCD40** (1 body) + **Clip_Gas** (1 body, 2 occurrences) — sensor
+  retention clips, snap into the tray windows. See section below.
 - **Lid** (1 body): 3mm plate, matching fillet + top chamfer, register lip (0.4mm
   clr, corner-notched), 4 M3 screw counterbores aligned to inserts.
 
@@ -76,7 +85,7 @@ Verified via pointContainment: slot = through-opening (matches fan/USB signature
 old-exhaust spot now solid. BaseShell single healthy body.
 Sketch6 coord map (for future edits): sketch x = world X (cm); sketch y = -(world Z);
 plane Y=7.93cm (wall midplane); symmetric cut 3.45mm/side clears 2.6mm wall.
-TODO Jimmy: SAVE doc + RE-EXPORT base .3mf/.stl (slot not in any export yet).
+DONE: exported + printed + fit-confirmed 2026-07-03.
 
 ## ESP32-S3 dual-USB-C port — widened (2026-07-02)
 Board = ESP32-S3-DevKitC-1-N32R16V: has TWO USB-C connectors on its end (native
@@ -88,7 +97,79 @@ full board end -> Base Sketch7/Extrude7 rebuilt to world X113-137 (24mm) × Z5.4
 symmetric cut through back wall. Guaranteed to clear both connectors regardless of
 exact placement; wall solid outside X113-137. Verified via pointContainment.
 If you ever want two neat cutouts instead: measure the two port centers + widths.
-TODO Jimmy: SAVE + RE-EXPORT base (slot not in any export yet).
+DONE: exported + printed + fit-confirmed 2026-07-03.
+
+## Sensor retention clips — added 2026-07-15
+Goal: hold each gas sensor in its bay. No adhesive/magnets. Snap-on, removable.
+
+MEASURED BAY FACTS (read off TrayBody, not guessed — reuse these):
+- Bay floor top Z=4.9, wall top Z=10.9 (walls 6mm tall), wall_t 1.6.
+- SCD40  inner X11.75-38.25 (26.5) Y9.10-32.90 (23.8); outer X10.15-39.85 Y7.50-34.50
+- BME680 inner X49.30-75.70 (26.4) Y11.60-30.40 (18.8); outer X47.70-77.30 Y10.0-32.0
+- SGP40  inner X83.50-109.90        Y11.60-30.40;        outer X81.90-111.50 Y10.0-32.0
+- Wire channels cut FULL wall height (Z4.9-10.9), 8mm wide @ Y17-25, BOTH side
+  walls -> each side wall is two 7.9mm stubs, not continuous. Connectors live
+  there: nothing may press or grab the board's +/-X edges.
+- Outboard free space (this decided the whole design):
+  fronts >=7.25mm all 3 bays | SCD40 back only **1.5mm** (PMS cradle wall @ Y36.0)
+  SCD40 sides 9.9 / 7.85mm | BME680 back 4.0mm | SGP40 back free
+  **SGP40 right wall X109.90-111.50 is SHARED with the ESP cradle -> zero
+  outboard space.** So no single arm orientation works for all 3 bays.
+
+MECHANISM: through-WINDOW in bay wall + cantilever arm outside the wall with a
+barb that snaps in. Window's TOP face IS the ledge (90 deg return). Chose window
+over a protruding lip: nothing to shear off, prints with no overhang trick, and
+each window adds bay airflow. Rejected simpler press-fit-only (would splay the
+1.6mm walls) and floor-socket pegs (only 0.5mm/side of free floor).
+
+ARM PLACEMENT (differs per bay by necessity, see free space above):
+- Clip_SCD40: 4 arms on the +/-X walls @ Y12.25 / Y29.75 (clear of Y17-25 channels).
+- Clip_Gas:   4 arms on the +/-Y walls @ X54.5 / X70.5 (BME680 local coords).
+
+PARTS: Clip_SCD40 x1 (1785mm3). Clip_Gas x2 (1699mm3 ea) — BME680 and SGP40 bays
+are dimensionally identical, so ONE part serves both; 2nd occurrence is the same
+component shifted +34.2mm X. Print 2 of Clip_Gas.
+
+CLIP GEOMETRY: ring plate Z14.0-15.6 w/ open centre (gas exchange); 4 legs down
+to Z6.5 pressing PCB corners on 4x4mm pads; 4 arms t=1.4 w=6.0, 0.2mm clearance
+to wall, barb 0.45mm deep.
+TRAY CHANGE: 12 through-windows 6.0 x 1.8mm @ Z5.8-7.6. Removed 207.3mm3
+(= 12 x 6 x 1.8 x 1.6 wall, exact). Wall left: 3.3mm above ledge, 0.9mm below.
+Features named `SnapWindow_Tools` (BaseFeature) + `SnapWindows` (Combine/cut).
+TrayBody still ONE healthy body.
+
+VERIFIED (not assumed):
+- All 12 windows probed via pointContainment: OPEN at Z6.7, SOLID at Z9.2
+  (the ledge) and Z5.3. Controls pass.
+- Clip-vs-tray boolean intersection = **0.000 mm3** all 3 clips.
+- Snap arm strain: L~7.1 t=1.4 deflection 0.45 -> eps = 1.5*t*y/L^2 = **1.87%**,
+  safe vs PETG ~4% allowable.
+- Barb 6.4-7.4 in a 5.8-7.6 window -> ~0.2mm board play; tolerates PCB 1.5-1.7mm.
+
+GOTCHA (cost a rebuild, do not re-derive): the barb's 45-deg lead-in ramp
+descends 0.65mm BELOW the barb's full-protrusion band, and the barb starts
+entering the wall 0.2mm up that ramp. First cut put the ramp toe at Z5.45, under
+the window floor (5.8) -> ramp would jam on the wall below the window and the
+clip could never seat. Showed up as a 1.470mm3 interference (= 4 x 0.3675, an
+exact integral match, which is how it was localised). Fix: RAISED barb 0.5mm
+(BARB_Z0 5.9 -> 6.4), did NOT thin the wall. Always assert interference==0
+before committing clip bodies.
+
+BUILD: script-built via Fusion MCP using TemporaryBRepManager boxes + booleans
+(no sketches — avoids all sketch-plane orientation pain). Tunables live at the
+top: PCB_T, PL_Z0/1, ARM_CLR/T/W, BARB_D, WIN_Z0/1, BARB_Z0/1.
+Script was NOT saved to the repo (Jimmy declined) -> rebuild is manual.
+MCP gotcha: BRepBody refs go STALE across BaseFeature.finishEdit(). Re-fetch
+tool bodies BY NAME before Combine or it dies with ALL_TOOL_BODY_REFERENCE_LOST.
+
+TODO before printing clips:
+- [ ] **PCB_T=1.6 is ASSUMED** and sets the press height (LEG_Z = 4.9 + PCB_T
+      = 6.5). Settle at the gas-sensor fit-test; if boards don't sit flat on the
+      bay floor, this is the number to change.
+- [ ] Confirm nothing tall sits at the board corners (legs press 4x4mm pads there).
+- [ ] Print clips ON THEIR SIDE (rotate 90). Plate-down puts layer lines across
+      the arm root = exactly where the bending stress goes.
+- [ ] Save doc + export Clip_SCD40 / Clip_Gas STL/3MF (none exported yet).
 
 ## Hardware spec — closure (read off Sensor_Case geometry 2026-07-01)
 - Inserts: **M3 brass heat-set**, set into the 4 BASE corner POSTS (Ø8 boss),
@@ -139,7 +220,10 @@ more if you want margin, but that walks away from the real PMS fan center (still
       holes→world X44-56 near top (world Z~23.4). See PMS inlet section below.
 - [ ] LED light-pipe height (front wall X126, Z25mm) — align to actual ESP LED.
 - [ ] USB-C cutout height/size vs actual connector.
-- [ ] Board heights/pocket depths at physical test fit.
+- [ ] Board heights/pocket depths at physical test fit. NOTE this now also
+      settles PCB_T for the retention clips (see clip section).
+- [ ] PMS5003 + ESP32-S3 have NO retention clips — cradles only, different
+      geometry. Revisit if they rattle.
 - Honeycomb finalized: hex_af=5mm, rib=1.0mm, compact centered windows
   (front X35-115, left Y10-45, right Y33-68, Z band fl+5..fl+22). Base is now
   built by ONE consolidated script (shell+bosses+ports+LED+vents) -> easy to retune.
